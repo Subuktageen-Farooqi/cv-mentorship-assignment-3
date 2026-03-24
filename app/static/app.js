@@ -10,13 +10,33 @@ const chatBox = document.getElementById('chatBox');
 const chatInput = document.getElementById('chatInput');
 const chatSend = document.getElementById('chatSend');
 const player = document.getElementById('player');
+const startDetect = document.getElementById('startDetect');
+const stopDetect = document.getElementById('stopDetect');
+const detectStatus = document.getElementById('detectStatus');
 
 attachBtn.onclick = async () => {
+  const url = rtspInput.value.trim();
+  if (!url) {
+    streamStatus.textContent = 'Please enter a stream URL before attaching.';
+    return;
+  }
+
   const res = await fetch('/api/stream/attach', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ rtsp_url: rtspInput.value }),
+    body: JSON.stringify({ rtsp_url: url }),
   });
+  if (!res.ok) {
+    let detail = `Attach failed (${res.status})`;
+    try {
+      const err = await res.json();
+      detail = err?.detail?.[0]?.msg || err?.detail || detail;
+    } catch (_e) {
+      // no-op
+    }
+    streamStatus.textContent = detail;
+    return;
+  }
   const data = await res.json();
   streamStatus.textContent = data.connected ? `Connected: ${data.url}` : `Error: ${data.last_error}`;
   if (data.connected && (data.url.startsWith('http://') || data.url.startsWith('https://'))) {
@@ -103,6 +123,27 @@ chatSend.onclick = async () => {
   });
   const data = await res.json();
   appendMessage('assistant', data.answer, data.references || []);
+};
+
+startDetect.onclick = async () => {
+  const source = rtspInput.value.trim();
+  if (!source) {
+    detectStatus.textContent = 'Set a source URL before starting detection.';
+    return;
+  }
+  const res = await fetch('/api/detection/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source_url: source, model_name: 'yolov8n.pt', confidence: 0.35, event_cooldown_sec: 5 }),
+  });
+  const data = await res.json();
+  detectStatus.textContent = data.message || (data.running ? 'Detector running' : 'Detector stopped');
+};
+
+stopDetect.onclick = async () => {
+  const res = await fetch('/api/detection/stop', { method: 'POST' });
+  const data = await res.json();
+  detectStatus.textContent = data.message || 'Detector stopped';
 };
 
 loadLogs();

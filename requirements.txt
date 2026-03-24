@@ -4,3 +4,5 @@ python-dotenv==1.1.1
 httpx==0.28.1
 pydantic==2.11.7
 pytest==8.4.1
+ultralytics==8.3.172
+opencv-python-headless==4.11.0.86

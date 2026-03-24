@@ -10,6 +10,7 @@ MemTracker is an end-to-end starter web app for monitoring CCTV-like streams, lo
 - **Timestamped clickable references** in the UI that seek the same on-page video player.
 - **Persistent chat history** (SQLite-backed).
 - **Dedicated Logs tab behavior** in the web UI with filters and refresh.
+- **Real YOLOv8 person detection + tracking loop** that logs `person_presence` events with `track-*` actor IDs.
 
 ## Architecture
 
@@ -80,6 +81,9 @@ uvicorn app.main:app --reload
 - `GET /api/events?actor_id=&scenario=`
 - `GET /api/chat/history`
 - `POST /api/chat/query`
+- `POST /api/detection/start`
+- `POST /api/detection/stop`
+- `GET /api/detection/status`
 
 ## Notes on Assignment Scenarios
 
@@ -89,4 +93,8 @@ This starter supports these baseline scenarios out-of-the-box:
 2. **Visual characteristics** through `traits[]` (e.g., `blue_shirt`, `helmet`, `backpack`)
 3. **Custom scenarios** by setting arbitrary `scenario` labels (e.g., `phone_usage`, `fall_detected`)
 
-For production scoring, plug your detection/tracking pipeline (YOLO/ByteTrack + trait/task classifier) into the `POST /api/events` ingestion path.
+The app now includes a YOLOv8 tracking worker and writes tracker outputs to the same event log table (`scenario=person_presence`, `actor_id=track-{id}`).
+
+### Why you might see 422 on stream attach
+
+If you click **Attach Stream** with an empty URL, FastAPI validation rejects the request (`422 Unprocessable Entity`). The frontend now validates this and shows a clear message before sending.

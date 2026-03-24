@@ -57,3 +57,17 @@ class ChatQueryResponse(BaseModel):
     answer: str
     references: list[TimestampReference]
     grounded: bool = True
+
+
+class DetectionStartRequest(BaseModel):
+    source_url: str = Field(min_length=1, description="RTSP/RTSPS/HTTP/HTTPS source for YOLO tracking.")
+    model_name: str = Field(default="yolov8n.pt", min_length=1)
+    confidence: float = Field(default=0.35, ge=0.01, le=1.0)
+    event_cooldown_sec: float = Field(default=5.0, ge=0.5, le=120.0)
+
+
+class DetectionStatus(BaseModel):
+    running: bool
+    source_url: str | None = None
+    model_name: str | None = None
+    message: str | None = None

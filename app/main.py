@@ -9,8 +9,19 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.db import init_db
-from app.models import ChatMessageOut, ChatQueryRequest, ChatQueryResponse, EventIn, EventOut, StreamAttachRequest, StreamState
+from app.models import (
+    ChatMessageOut,
+    ChatQueryRequest,
+    ChatQueryResponse,
+    DetectionStartRequest,
+    DetectionStatus,
+    EventIn,
+    EventOut,
+    StreamAttachRequest,
+    StreamState,
+)
 from app.services.chat_service import ChatService
+from app.services.detection_pipeline import DetectionPipeline
 from app.services.event_store import EventStore
 from app.services.stream_manager import StreamManager
 
@@ -29,6 +40,7 @@ init_db()
 stream_manager = StreamManager()
 event_store = EventStore()
 chat_service = ChatService(event_store)
+detection_pipeline = DetectionPipeline(event_store)
 
 static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
@@ -73,3 +85,27 @@ async def query_chat(body: ChatQueryRequest) -> ChatQueryResponse:
     result = await chat_service.answer_query(body.question)
     chat_service.add_message("assistant", result.answer)
     return result
+
+
+@app.post("/api/detection/start", response_model=DetectionStatus)
+def start_detection(body: DetectionStartRequest) -> DetectionStatus:
+    stream_state = stream_manager.state()
+    source = body.source_url or stream_state.url
+    if not source:
+        raise HTTPException(status_code=400, detail="No source_url provided and no attached stream available.")
+    return detection_pipeline.start(
+        source_url=source,
+        model_name=body.model_name,
+        confidence=body.confidence,
+        event_cooldown_sec=body.event_cooldown_sec,
+    )
+
+
+@app.post("/api/detection/stop", response_model=DetectionStatus)
+def stop_detection() -> DetectionStatus:
+    return detection_pipeline.stop()
+
+
+@app.get("/api/detection/status", response_model=DetectionStatus)
+def detection_status() -> DetectionStatus:
+    return detection_pipeline.status()
