@@ -71,6 +71,20 @@ export GROQ_MODEL=llama-3.3-70b-versatile
 uvicorn app.main:app --reload
 ```
 
+Alternative equivalent command (compatibility entrypoint):
+
+```bash
+uvicorn main:app --reload
+```
+
+If import errors occur (`No module named 'app'`), run the bootstrap launcher instead:
+
+```bash
+python run.py
+```
+
+If your local copy does not include `run.py`, use one of the uvicorn commands above.
+
 5. Open `http://127.0.0.1:8000`.
 
 ## API Overview
@@ -102,3 +116,31 @@ If you click **Attach Stream** with an empty URL, FastAPI validation rejects the
 ### Why RTSP may not render in the browser video player
 
 Most browsers do not natively play raw `rtsp://` streams in an HTML `<video>` tag. In this app, RTSP streams are attached for backend detection, while direct in-page preview generally requires transcoding/repackaging to browser-friendly formats (e.g., HLS/WebRTC/MSE gateway).
+
+### Detector shows `frames=0, events=0`
+
+If detector status stays at `frames=0, events=0`, the backend is not receiving decodable frames from the stream. The detector now performs a startup frame-read check and reports an explicit message when the stream opens but no frames arrive.
+The detector also defaults OpenCV FFmpeg RTSP transport to TCP (`OPENCV_FFMPEG_CAPTURE_OPTIONS=rtsp_transport;tcp`) for better compatibility.
+
+### Troubleshooting `No module named 'app'`
+
+If you see:
+
+- `ModuleNotFoundError: No module named 'app'`
+- `Can't list 'app'` from `python -m compileall app`
+
+you are likely not in the directory that contains the `app/` folder.
+
+Checks:
+
+```bash
+# PowerShell
+Get-ChildItem
+```
+
+You should see `app`, `README.md`, and `requirements.txt`.  
+Then run:
+
+```bash
+python run.py
+```
