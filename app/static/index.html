@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MemTracker</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>MemTracker</h1>
+      <input id="rtspInput" placeholder="rtsp://username:password@host:554/stream" />
+      <button id="attachBtn">Attach Stream</button>
+      <span id="streamStatus">Disconnected</span>
+    </header>
+
+    <main>
+      <section>
+        <h2>Stream</h2>
+        <video id="player" controls width="560"></video>
+        <p id="seekLabel">Click a reference in chat to seek this player.</p>
+      </section>
+
+      <section>
+        <h2>Logs</h2>
+        <div class="toolbar">
+          <input id="actorFilter" placeholder="Filter by actor" />
+          <input id="scenarioFilter" placeholder="Filter by scenario" />
+          <button id="refreshLogs">Refresh</button>
+          <button id="seedEvent">Add Demo Event</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Time (s)</th><th>Actor</th><th>Scenario</th><th>Traits</th></tr>
+          </thead>
+          <tbody id="logsBody"></tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Chat (Groq)</h2>
+        <div id="chatBox"></div>
+        <div class="toolbar">
+          <input id="chatInput" placeholder="Ask about events (e.g., backpack person after 120s)" />
+          <button id="chatSend">Send</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

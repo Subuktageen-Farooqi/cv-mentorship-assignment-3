@@ -1,0 +1,89 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  background: #1e293b;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+
+section {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+section:last-child {
+  grid-column: span 2;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+input, button {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+button {
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border-bottom: 1px solid #334155;
+  text-align: left;
+  padding: 6px;
+}
+
+#chatBox {
+  min-height: 180px;
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.msg {
+  margin-bottom: 8px;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.msg.user {
+  background: #1d4ed8;
+}
+
+.msg.assistant {
+  background: #334155;
+}
+
+.timestamp-link {
+  color: #93c5fd;
+  cursor: pointer;
+  margin-right: 6px;
+}
