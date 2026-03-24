@@ -117,6 +117,11 @@ If you click **Attach Stream** with an empty URL, FastAPI validation rejects the
 
 Most browsers do not natively play raw `rtsp://` streams in an HTML `<video>` tag. In this app, RTSP streams are attached for backend detection, while direct in-page preview generally requires transcoding/repackaging to browser-friendly formats (e.g., HLS/WebRTC/MSE gateway).
 
+### Detector shows `frames=0, events=0`
+
+If detector status stays at `frames=0, events=0`, the backend is not receiving decodable frames from the stream. The detector now performs a startup frame-read check and reports an explicit message when the stream opens but no frames arrive.
+The detector also defaults OpenCV FFmpeg RTSP transport to TCP (`OPENCV_FFMPEG_CAPTURE_OPTIONS=rtsp_transport;tcp`) for better compatibility.
+
 ### Troubleshooting `No module named 'app'`
 
 If you see:

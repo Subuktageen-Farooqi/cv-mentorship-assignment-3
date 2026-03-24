@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import threading
 import time
 from dataclasses import dataclass
@@ -105,6 +106,7 @@ class DetectionPipeline:
             return
 
         try:
+            os.environ.setdefault("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp")
             capture = cv2.VideoCapture(config.source_url)
             if not capture.isOpened():
                 self._status = DetectionStatus(
@@ -116,7 +118,26 @@ class DetectionPipeline:
                     events_logged=self._events_logged,
                 )
                 return
+
+            frame_ok = False
+            for _ in range(60):
+                ok, _frame = capture.read()
+                if ok:
+                    frame_ok = True
+                    break
+                time.sleep(0.1)
             capture.release()
+
+            if not frame_ok:
+                self._status = DetectionStatus(
+                    running=False,
+                    source_url=config.source_url,
+                    model_name=config.model_name,
+                    message="Stream opened but no frames were received. Try another RTSP URL/transport or verify camera output.",
+                    frames_processed=self._frames_processed,
+                    events_logged=self._events_logged,
+                )
+                return
 
             model = YOLO(config.model_name)
             results = model.track(
