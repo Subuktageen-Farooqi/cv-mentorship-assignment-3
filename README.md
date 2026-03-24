@@ -98,3 +98,7 @@ The app now includes a YOLOv8 tracking worker and writes tracker outputs to the 
 ### Why you might see 422 on stream attach
 
 If you click **Attach Stream** with an empty URL, FastAPI validation rejects the request (`422 Unprocessable Entity`). The frontend now validates this and shows a clear message before sending.
+
+### Why RTSP may not render in the browser video player
+
+Most browsers do not natively play raw `rtsp://` streams in an HTML `<video>` tag. In this app, RTSP streams are attached for backend detection, while direct in-page preview generally requires transcoding/repackaging to browser-friendly formats (e.g., HLS/WebRTC/MSE gateway).

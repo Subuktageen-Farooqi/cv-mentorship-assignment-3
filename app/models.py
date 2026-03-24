@@ -71,3 +71,5 @@ class DetectionStatus(BaseModel):
     source_url: str | None = None
     model_name: str | None = None
     message: str | None = None
+    frames_processed: int = 0
+    events_logged: int = 0

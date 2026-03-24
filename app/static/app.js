@@ -39,6 +39,9 @@ attachBtn.onclick = async () => {
   }
   const data = await res.json();
   streamStatus.textContent = data.connected ? `Connected: ${data.url}` : `Error: ${data.last_error}`;
+  if (data.connected && (data.url.startsWith('rtsp://') || data.url.startsWith('rtsps://'))) {
+    streamStatus.textContent = `${streamStatus.textContent} | Browser preview is not available for raw RTSP. Detection still runs on backend.`;
+  }
   if (data.connected && (data.url.startsWith('http://') || data.url.startsWith('https://'))) {
     player.src = data.url;
   }
@@ -137,14 +140,34 @@ startDetect.onclick = async () => {
     body: JSON.stringify({ source_url: source, model_name: 'yolov8n.pt', confidence: 0.35, event_cooldown_sec: 5 }),
   });
   const data = await res.json();
-  detectStatus.textContent = data.message || (data.running ? 'Detector running' : 'Detector stopped');
+  detectStatus.textContent = formatDetectStatus(data);
 };
 
 stopDetect.onclick = async () => {
   const res = await fetch('/api/detection/stop', { method: 'POST' });
   const data = await res.json();
-  detectStatus.textContent = data.message || 'Detector stopped';
+  detectStatus.textContent = formatDetectStatus(data);
 };
+
+function formatDetectStatus(data) {
+  const msg = data.message || (data.running ? 'Detector running' : 'Detector stopped');
+  return `${msg} | frames=${data.frames_processed || 0}, events=${data.events_logged || 0}`;
+}
+
+async function pollDetectionStatus() {
+  try {
+    const res = await fetch('/api/detection/status');
+    if (!res.ok) return;
+    const data = await res.json();
+    detectStatus.textContent = formatDetectStatus(data);
+    if (data.running || (data.events_logged || 0) > 0) {
+      await loadLogs();
+    }
+  } catch (_e) {
+    // no-op
+  }
+}
 
 loadLogs();
 loadHistory();
+setInterval(pollDetectionStatus, 2000);
